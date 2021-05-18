@@ -14,15 +14,14 @@ from dash_bootstrap_templates import load_figure_template
 
 load_figure_template("cerulean")
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.CERULEAN])
-# app = dash.Dash(__name__)
-# ====================================================================
-
-
+# Load the data for deployment table and dictionary for colormaps
 df = pd.read_csv("data/glider_deployments.csv")
 cm = {"t": "thermal",
       "s": "haline",
       "dens": "dense",
       "chl": "algae"}
+# Build different components of the frame work
+    # title block
 jumbotron = dbc.Jumbotron(
     [
         html.H1("Glider Data Visualization", className="display-3"),
@@ -37,6 +36,35 @@ jumbotron = dbc.Jumbotron(
         # html.P(dbc.Button("Learn more", color="primary"), className="lead"),
     ],className="bg-primary text-white"
 )
+
+    # images of a glider and a gif of how gliders work
+imag = html.Div(children=[
+    html.Img(src="https://www.sequoiasci.com/wp-content/uploads/2016/10/Slocum-G2-from-Website.jpg",
+             style={"width":'80%'}),
+    html.Img(src="http://norgliders.gfi.uib.no/pict/glider4.gif",
+             style={"width":'100%'}),
+],
+)
+# imag = dbc.Card(
+#     [
+#         dbc.CardImg(src="https://www.sequoiasci.com/wp-content/uploads/2016/10/Slocum-G2-from-Website.jpg"),
+#         dbc.CardImg(src="http://norgliders.gfi.uib.no/pict/glider4.gif"),
+#     ], color="primary", outline=True,style={"height": "100%"}
+#
+# )
+
+    # deployment table
+deployment = html.Div(children=[
+    html.H4("Glider Deployment Sheet"),
+    dbc.Table.from_dataframe(df, striped=True, bordered=True, hover=True,),
+],
+)
+# deployment = dbc.Card([
+#     dbc.CardHeader(html.H4("Glider Deployment Sheet"),className='bg-primary text-white'),
+#     dbc.CardBody(dbc.Table.from_dataframe(df, striped=True, bordered=True, hover=True,),)
+# ], color="primary", outline=True,style={"height": "100%"}
+# )
+    # dropdown for deployments selection
 dropdown1 = dcc.Dropdown(
     id="slct_deployment",
     options=[{"label": df["glider"][i] + ' ' + df["Deployment #"][i],
@@ -46,7 +74,16 @@ dropdown1 = dcc.Dropdown(
     value='Ramses_Deployment1',
     clearable=False,
 )
+container = dbc.Card(
+    [
+        dbc.CardHeader(html.H4("Coordinate Transformation")),
+        dbc.CardBody(
+            dbc.FormGroup([dbc.Label("Select Glider Deployment"), dropdown1])
+        )
+    ]
+)
 
+    # dropdown for parameter selection
 dropdown2 = dcc.Dropdown(
     id="slct_parameter",
     options=[{"label": 'Temperature', "value": 't'},
@@ -59,22 +96,7 @@ dropdown2 = dcc.Dropdown(
     clearable=False,
 )
 
-
-imag = dbc.Card(
-    [
-        dbc.CardImg(src="http://norgliders.gfi.uib.no/pict/glider4.gif"),
-        dbc.CardImg(src="https://www.sequoiasci.com/wp-content/uploads/2016/10/Slocum-G2-from-Website.jpg"),
-    ],
-    color="primary", outline=True
-
-)
-
-# deployment = dbc.Table.from_dataframe(df, striped=True, bordered=True, hover=True)
-deployment = dbc.Card([
-    dbc.CardHeader(html.H4("Glider Deployment Sheet"),className='bg-primary text-white'),
-    dbc.CardBody(dbc.Table.from_dataframe(df, striped=True, bordered=True, hover=True,),)
-], color="primary", outline=True
-)
+    # glider tracks in map view vs transformed coordinate
 track = dbc.Card(
     [
         dbc.CardHeader(
@@ -86,7 +108,6 @@ track = dbc.Card(
                     "On the left is the glider trajectory in the original map view. "
                     "On the right is the glider trajectory in transformed semi-Lagrangian Coordinate. "
                     "In this coordinate, the trajectory shows glider's movement relative to the water rather than the ground. ",
-
                 ),
                 dbc.Row(
                     [dbc.Col(dcc.Graph(id="glider_map"), width=6),
@@ -95,6 +116,8 @@ track = dbc.Card(
             ]
         )],
     color="primary", outline=True)
+
+    # water velocity from glider
 vel = dbc.Card(
     [
         dbc.CardHeader(
@@ -120,6 +143,7 @@ vel = dbc.Card(
         )
     ], color="primary", outline=True)
 
+    # four parameters in the view of time series
 ts = dbc.Card(
     [
         dbc.CardHeader(
@@ -139,6 +163,7 @@ ts = dbc.Card(
         )
     ], color="primary", outline=True
 )
+    # choosen parameter in the 3d view (map vs transformed coordinate)
 p3d = dbc.Card(
     [
         dbc.CardHeader(
@@ -164,130 +189,68 @@ p3d = dbc.Card(
         )
     ], color="primary", outline=True
 )
-container = dbc.Card(
-    [
-        dbc.CardHeader(html.H4("Coordinate Transformation")),
-        dbc.CardBody(
-            dbc.FormGroup([dbc.Label("Select Glider Deployment"), dropdown1])
-            # [
-            #     dbc.Row(
-            #         dbc.Col(dbc.FormGroup([dbc.Label("Select Glider Deployment"), dropdown1]))
-            #     ),
-            #
-            #
-            #     # dbc.Row(
-            #     #     dbc.Col(dbc.FormGroup([dbc.Label("Choose a Parameter to show"), dropdown2]))
-            #     # ),
-            #     # dbc.Row(
-            #     #     [
-            #     #         dbc.Col(dcc.Graph(id="3d_map")),
-            #     #     ]
-            #     # ),
-            #     # dbc.Row(
-            #     #     [
-            #     #         dbc.Col(dcc.Graph(id="3d_tc"))
-            #     #     ]
-            #     # )
-            # ]
-        )
-    ]
-)
+
 
 app.layout = html.Div(
     children=[
         jumbotron,
-        html.Div(className='row',
-                 children=[
-                     dbc.Container(
-                         [dbc.Row([dbc.Col(imag,width=4), dbc.Col(deployment,width=8)],align="center",justify='center',
-                                  style={'margin-left': 2, 'margin-right': 2} ),
-                          html.Br(),
-                          dbc.Row(
-                              dbc.Col(
-                                  container, width=12
-                              ),align="center",justify='center',
-                              style={'margin-left': 2, 'margin-right': 2} ),
-                          html.Br(),
-                          dbc.Row(
-                              [
-                                  dbc.Col(track,
-                                          width=7),
-                                  dbc.Col(
-                                      vel,
-                                      width = 5
-                                  ),
-                              ], className="h-30", align="center", justify='center',
-                              style={'margin-left': 2, 'margin-right': 2}
-                          ),
-                          html.Br(),
-                          dbc.Row(
-                              [
-                                  dbc.Col(ts,
-                                          width=7),
-                                  dbc.Col(
-                                      p3d,
-                                      width = 5
-                                  ),
-                              ], className="h-30", align="center", justify='center',
-                              style={'margin-left': 2, 'margin-right': 2}
-                          ),
-                          # dbc.Row(
-                          #     [
-                          #         dbc.Col(ts,
-                          #                 width=5),
-                          #         dbc.Col(
-                          #             vel,
-                          #             width = 7
-                          #         ),
-                          #     ], className="h-30", align="center", justify='center',
-                          #     style={'margin-left': 2, 'margin-right': 2}
-                          # ),
 
-                          ],
-                         fluid=True,
+        dbc.Container(
+            [dbc.Row([dbc.Col(imag,className='col-4',align="left"),
+                      dbc.Col(deployment,className='col-8',align="right"),
+                      ],align="center",justify='center',
+                     style={'margin-left': 2, 'margin-right': 2}, className="h-95",
                      ),
+             ],
+            fluid=True, style={"height": "65vh"}
+        ),
+        html.Br(),
 
-                     # dbc.Container(
-                     #     # [
-                     #         dbc.Row(
-                     #             dbc.Col(
-                     #                 container, width=11
-                     #             ),align="center",justify='center',
-                     #             style={'margin-left': 2,} ),
-                     #     # ],
-                     #     # dbc.Row([dbc.Col(imag,width=4), dbc.Col(deployment,width=8)],align="center",justify='center',
-                     #     #         style={'margin-left': 2,'margin-right': 2}),
-                     #     fluid=True,
-                     # ),
+        # dbc.Container(
+        #     [dbc.Row([dbc.Col(imag,width=4),
+        #               dbc.Col(deployment,width=8),
+        #               ],align="center",justify='center',
+        #              style={'margin-left': 2, 'margin-right': 2}, className="h-95",
+        #              ),
+        #      ],
+        #     fluid=True, style={"height": "75vh"}
+        # ),
 
-                     # html.Div(
-                     #          children=[
-                     #
-                     #              # dbc.Row(html.H6("Glider deployment sheet")),
-                     #              # html.Div(className='row',
-                     #              #         children=[
-                     #              #            html.Div(className="six columns", style={'margin-left': 0},
-                     #              #                      children=[
-                     #              #                           deployment
-                     #              #                      ]),
-                     #              #             html.Div(className="three columns offset by six columns div-for-chart",
-                     #              #                      children=[
-                     #              #                           html.Img(src='https://www.whoi.edu/wp-content/uploads/2019/01/slocum_en_42909.jpg')
-                     #              #                      ]),
-                     #              #         ]),
-                     #
-                     #              dbc.Row(
-                     #                  [
-                     #                      dcc.Graph(id="time_series")
-                     #                  ]
-                     #              ),
-                     #              # dbc.Row(
-                     #              #     [
-                     #              #         dcc.Graph(id="ctd")
-                     #              #     ]
-                     #              # )
-                     #          ])
-                 ])
+        dbc.Container([
+            html.Br(),
+            dbc.Row(
+                dbc.Col(
+                    container, width=12
+                ),align="center",justify='center',
+                style={'margin-left': 2, 'margin-right': 2} ),
+            html.Br(),
+            dbc.Row(
+                [
+                    dbc.Col(track,
+                            width=7),
+                    dbc.Col(
+                        vel,
+                        width = 5
+                    ),
+                ], className="h-30", align="center", justify='center',
+                style={'margin-left': 2, 'margin-right': 2}
+            ),
+            html.Br(),
+            dbc.Row(
+                [
+                    dbc.Col(ts,
+                            width=7),
+                    dbc.Col(
+                        p3d,
+                        width = 5
+                    ),
+                ], className="h-30", align="center", justify='center',
+                style={'margin-left': 2, 'margin-right': 2}
+            ),
+        ],
+            fluid=True,
+        ),
+
     ]
 
 )
@@ -305,7 +268,7 @@ def update_graph(option_slctd):
     fig1 = px.scatter_mapbox(current, lat="lat", lon="lon", hover_name="time",
                              zoom=7, center={"lat": 35.3, "lon": -75.4},
                              )
-    # fig.update_layout(mapbox_style="carto-positron")
+
     fig1.update_layout(
         mapbox_style="white-bg",
         mapbox_layers=[
