@@ -24,14 +24,21 @@ cm = {"t": "thermal",
     # title block
 jumbotron = dbc.Jumbotron(
     [
-        html.H1("Glider Data Visualization", className="display-3"),
+        html.H1("Glider HUB", className="display-3"),
         html.P(
-            "These glider deployments are part of PEACH field program.",
+            "By Lu Han (luhan@unc.edu)",
             className="lead",
         ),
 
         html.P(
-            "Processes driving Exchanges At Cape Hatteras (PEACH)"
+            "These glider deployments are part of PEACH field program. "
+            "PEACH is short for Processes driving Exchanges At Cape Hatteras, which aims to advance "
+            "the fundamental understanding of the processes and dynamics underlying shelf-open ocean "
+            "exchanges at convergent, energetically forced coastal margins. "
+            "Cape Hatteras, NC, the dividing point between the Middle Atlantic Bight "
+            "(MAB) and South Atlantic Bight (SAB) along the US East Coast, is an "
+            "active region for shelf-open ocean exchanges due to the confluent western boundary "
+            "currents and convergence of the adjacent shelf and slope waters. "
         ),
         # html.P(dbc.Button("Learn more", color="primary"), className="lead"),
     ],className="bg-primary text-white"
@@ -95,99 +102,111 @@ dropdown2 = dcc.Dropdown(
     value='t',
     clearable=False,
 )
-
-    # glider tracks in map view vs transformed coordinate
-track = dbc.Card(
+choose_param = dbc.Card(
     [
-        dbc.CardHeader(
-            html.H4("Glider Trajectory before and after coordinate transformation")
-        ),
+        dbc.CardHeader(html.H4("Water Properties: (T, S, Dens, Chlorophyll)")),
         dbc.CardBody(
-            [
-                html.P(
-                    "On the left is the glider trajectory in the original map view. "
-                    "On the right is the glider trajectory in transformed semi-Lagrangian Coordinate. "
-                    "In this coordinate, the trajectory shows glider's movement relative to the water rather than the ground. ",
-                ),
-                dbc.Row(
-                    [dbc.Col(dcc.Graph(id="glider_map"), width=6),
-                     dbc.Col(dcc.Graph(id="map_tc"), width=6)]
-                )
-            ]
-        )],
-    color="primary", outline=True)
+            dbc.FormGroup([dbc.Label("Select One Parameter to Show in 3D View"), dropdown2])
+        )
+    ]
+)
+    # glider tracks in map view vs transformed coordinate
+track = html.Div(children=[
+    dbc.Row(
+        [dbc.Col(dcc.Graph(id="glider_map"), className='col-6'),
+         dbc.Col(dcc.Graph(id="map_tc"), className='col-6')]
+    )],
+)
+
+track_caption = html.Div(children=[
+    html.Figcaption(children=[
+        html.H5("Glider Trajectory before and after coordinate transformation"),
+        html.P(
+            "On the left is the glider trajectory in the original map view. "
+            "On the right is the glider trajectory in transformed semi-Lagrangian Coordinate. "
+            "In this coordinate, the trajectory shows glider's movement relative to the water rather than the ground. ",
+        ),
+    ])
+])
 
     # water velocity from glider
-vel = dbc.Card(
-    [
-        dbc.CardHeader(
-            html.H4(
-                "Depth Averaged Water Velocity from Glider")
+vel = html.Div(children=[
+    dcc.Graph(id="time_series"),
+    ])
+vel_caption = html.Div(children=[
+    html.Figcaption(children=[
+        html.H5(
+            "Depth Averaged Water Velocity from Glider"),
+        html.P(
+            "Under the assumption of homogenous flow, we used the depth averaged water velocity "
+            "measured/computed by the glider to estimate the water movement."
         ),
-        dbc.CardBody(
-            [
-                html.P(
-                    "Under the assumption of homogenous flow, we used the depth averaged water velocity "
-                    "measured/computed by the glider to estimate the water movement."
-                ),
-                dbc.Row(
-                    [
-                        dbc.Col(
-                            [
-                                dcc.Graph(id="time_series")
-                            ],
-                        )
-                    ]
-                )
-            ]
-        )
-    ], color="primary", outline=True)
+    ]),
+])
+
 
     # four parameters in the view of time series
-ts = dbc.Card(
+ts = html.Div(
+    children=
     [
-        dbc.CardHeader(
-            html.H4(
-                "Parameters Time Series")
-        ),
-        dbc.CardBody(
             dbc.Row(
                 [
                     dbc.Col(
                         [
-                            dcc.Graph(id="ctd")
+                            dcc.Graph(id="ctd",style={"height":'100vh','margin-top':'0'})
                         ]
                     )
-                ]
+                ], className='h-100'
             )
-        )
-    ], color="primary", outline=True
+    ],
 )
     # choosen parameter in the 3d view (map vs transformed coordinate)
-p3d = dbc.Card(
+# p3d = html.Div( children=
+#     [
+#                 dbc.Row(
+#                     [
+#                         dbc.Col(dcc.Graph(id="3d_map"),),
+#                     ],style={"height":'50vh'}
+#                 ),
+#
+#     ],
+# )
+p3d = html.Div(
+    children=
     [
-        dbc.CardHeader(
-            html.H4(
-                "Show in 3D")
-        ),
-        dbc.CardBody(
+            dbc.Row(
+                [
+                    dbc.Col(
+                        [
+                            dcc.Graph(id="3d_map",style={"height":'95vh'})
+                        ]
+                    )
+                ], className='h-100'
+            )
+    ],
+)
+
+
+aboutme = dbc.Jumbotron(
+    [
+        dbc.Container(
             [
-                dbc.Row(
-                    dbc.Col(dbc.FormGroup([dbc.Label("Choose a Parameter to show"), dropdown2]))
+                html.H5("A little about me...",),
+                html.Br(),
+                html.P(
+                    "A PhD student at UNC-Chapel Hill. "
                 ),
-                dbc.Row(
-                    [
-                        dbc.Col(dcc.Graph(id="3d_map")),
-                    ]
+                html.P(
+                    "Ten years of education in oceanography and eight years of experience in data analysis."
                 ),
-                dbc.Row(
-                    [
-                        dbc.Col(dcc.Graph(id="3d_tc"))
-                    ]
-                )
-            ]
+                html.P(
+                    "Data is the gate to knowledge and analysis is the key."
+                ),
+            ],
+            fluid=True,
         )
-    ], color="primary", outline=True
+    ],
+    fluid=True, style={"margin-top":'20','margin-down':'0'}
 )
 
 
@@ -204,52 +223,65 @@ app.layout = html.Div(
              ],
             fluid=True, style={"height": "65vh"}
         ),
-        html.Br(),
+        # html.Br(),
 
-        # dbc.Container(
-        #     [dbc.Row([dbc.Col(imag,width=4),
-        #               dbc.Col(deployment,width=8),
-        #               ],align="center",justify='center',
-        #              style={'margin-left': 2, 'margin-right': 2}, className="h-95",
-        #              ),
-        #      ],
-        #     fluid=True, style={"height": "75vh"}
-        # ),
+        dbc.Container(
+            [
+                dbc.Row(
+                    dbc.Col(
+                        container, width=12
+                    ), align="center", justify='center',
+                    style={'margin-left': 2, 'margin-right': 2}),
+                dbc.Row(
+                    [
+                        dbc.Col(track,
+                                className='col-7'),
+                        dbc.Col(vel,
+                                className='col-5'),
+                    ], className="h-80", align="center", justify='bottom',
+                    style={'margin-left': 2, 'margin-right': 2}
+                ),
+                html.Br(),
+                dbc.Row(
+                    [
+                        dbc.Col(track_caption,
+                                className='col-7'),
+                        dbc.Col(vel_caption,
+                                className='col-5'),
+                    ], align="center", justify='top',
+                    style={'margin-left': 2, 'margin-right': 2}
+                ),
+            ],
+            fluid=True, style={"height": "90vh"}
+        ),
 
         dbc.Container([
-            html.Br(),
+# dbc.Row(
+#                     dbc.Col(dbc.FormGroup([dbc.Label("Choose a Parameter to show"), dropdown2]))
+#                 ),
             dbc.Row(
-                dbc.Col(
-                    container, width=12
-                ),align="center",justify='center',
-                style={'margin-left': 2, 'margin-right': 2} ),
-            html.Br(),
-            dbc.Row(
-                [
-                    dbc.Col(track,
-                            width=7),
                     dbc.Col(
-                        vel,
-                        width = 5
-                    ),
-                ], className="h-30", align="center", justify='center',
-                style={'margin-left': 2, 'margin-right': 2}
-            ),
-            html.Br(),
+                        choose_param, width=12
+                    ), align="center", justify='center',
+                    style={'margin-left': 2, 'margin-right': 2}),
+
             dbc.Row(
                 [
                     dbc.Col(ts,
-                            width=7),
+                            className='col-7'),
                     dbc.Col(
                         p3d,
-                        width = 5
+                        className='col-5'
                     ),
-                ], className="h-30", align="center", justify='center',
+                ], align="top", justify='center',
                 style={'margin-left': 2, 'margin-right': 2}
             ),
+            html.Br()
         ],
-            fluid=True,
+            fluid=True, style={"height": "130vh"}
         ),
+
+        aboutme
 
     ]
 
@@ -271,6 +303,7 @@ def update_graph(option_slctd):
 
     fig1.update_layout(
         mapbox_style="white-bg",
+        margin=dict(l=20, r=20, t=20, b=20),
         mapbox_layers=[
             {
                 "below": 'traces',
@@ -286,7 +319,7 @@ def update_graph(option_slctd):
                       y="yr",
                       hover_name="time",
                       hover_data=[])
-    # fig2.update_layout()
+    fig2.update_layout(margin=dict(l=20, r=20, t=20, b=20),)
     fig3 = go.Figure()
     fig3.add_trace(go.Scatter(x=pd.to_datetime(current['time']), y=current['u'],
                               mode='lines',
@@ -296,21 +329,23 @@ def update_graph(option_slctd):
                               name='v'))
     fig3.update_layout(xaxis_title='Time',
                        yaxis_title='Velocity (m/s)',
-                       height=475,)
+                       margin=dict(l=20, r=20, t=20, b=20),
+                       )
 
     return fig1, fig2, fig3
 
 
 @app.callback(
-    [Output(component_id='3d_map', component_property='figure'),
-     Output(component_id='3d_tc', component_property='figure')],
+    Output(component_id='3d_map', component_property='figure'),
     [Input(component_id='slct_deployment', component_property='value'),
      Input(component_id='slct_parameter', component_property='value')]
 )
 def update_map(option_slctd, parameter):
     ctd = pd.read_csv("data/" + option_slctd + "_ctd_tc.csv",
                       skiprows=lambda x: (x != 0) and x % 10)
-    fig5 = go.Figure()
+    fig5 = make_subplots(rows=2, cols=1, specs=[[{'type': 'scatter3d'},],
+               [{'type': 'scatter3d'},]])
+
     fig5.add_trace(
         go.Scatter3d(
             x=ctd['lon'],
@@ -324,16 +359,16 @@ def update_map(option_slctd, parameter):
                 line_width=None,
                 showscale=True
             ),
-        )
+        ),
+        row = 1, col=1
     )
     fig5.update_layout(
-        autosize=False,
-        height=550,
+        # autosize=False,
+        # height=550,
         showlegend=False
     )
 
-    fig6 = go.Figure()
-    fig6.add_trace(
+    fig5.add_trace(
         go.Scatter3d(
             x=ctd['xr'],
             y=ctd['yr'],
@@ -346,14 +381,16 @@ def update_map(option_slctd, parameter):
                 line_width=None,
                 showscale=True
             ),
-        )
+        ),
+        row = 2, col=1
     )
-    fig6.update_layout(
-        autosize=False,
-        height=550,
+    fig5.update_layout(
+        # autosize=False,
+        # height=550,
+        margin=dict(l=10, r=20, t=10, b=20),
         showlegend=False
     )
-    return fig5, fig6
+    return fig5
 
 
 @app.callback(
@@ -434,8 +471,10 @@ def update_plot(option_slctd):
         row=4, col=1
     )
     fig.update_layout(
-        autosize=False,
-        height=1200,
+        # title='Parameters as time series',
+        # autosize=False,
+        # height=1200,
+        margin=dict(l=20, r=20, t=20, b=20),
         showlegend=False
     )
     fig.update_yaxes(autorange="reversed")
